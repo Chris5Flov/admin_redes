@@ -1,0 +1,39 @@
+services:
+  servidor:
+    image: ubuntu:latest
+    container_name: servidor_red
+    stdin_open: true 
+    tty: true
+    networks:
+      - red_proyecto
+    volumes:
+      - datos_servidor:/mnt/disco_compartido
+
+  cliente:
+    image: ubuntu:latest
+    container_name: cliente_red
+    stdin_open: true
+    tty: true
+    networks:
+      - red_proyecto
+  monitor:
+      image: netdata/netdata:latest
+      container_name: monitor_red
+      ports:
+        - "19999:19999"
+      restart: unless-stopped
+      cap_add:
+        - SYS_PTRACE
+      security_opt:
+        - apparmor:unconfined
+      volumes:
+        - /proc:/host/proc:ro
+        - /sys:/host/sys:ro
+        - /var/run/docker.sock:/var/run/docker.sock:ro
+
+networks:
+  red_proyecto:
+    driver: bridge
+
+volumes:
+  datos_servidor:
